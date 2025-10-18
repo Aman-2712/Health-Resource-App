@@ -18,6 +18,7 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, onNavigate }) =
           transition={{ duration: 0.8 }}
           className="text-4xl md:text-6xl font-extrabold text-gray-900 dark:text-white"
         >
+          Swastha❤️‍🩹
           Help save lives in emergencies
         </motion.h1>
         <motion.h2
