@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root{
+  --primary: #2563eb;
+  --accent: #f43f5e;
+}
+
+html,body,#root{height:100%}
+body{font-family: Inter, ui-sans-serif, system-ui}
+
+.hidden-by-default{display:none}

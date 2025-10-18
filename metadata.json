@@ -1,0 +1,9 @@
+
+{
+  "name": "AI Emergency Aid",
+  "description": "An AI-powered web application to provide instant first-aid guidance and connect users with nearby emergency services using their location.",
+  "requestFramePermissions": [
+    "geolocation",
+    "camera"
+  ]
+}
