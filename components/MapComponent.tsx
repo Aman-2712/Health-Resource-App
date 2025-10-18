@@ -57,13 +57,12 @@ const MapComponent: React.FC<MapProps> = ({ center, markers }) => {
         .bindPopup('<b>Your Location</b>');
 
       // Custom icons
-      const hospitalIcon = L.icon({
-        iconUrl:
-          'https://cdn-icons-png.flaticon.com/512/2991/2991228.png', // Hospital cross icon
-        iconSize: [40, 40],
-        iconAnchor: [20, 40],
-        popupAnchor: [0, -35],
-        className: 'hospital-icon',
+      const hospitalIcon = L.divIcon({
+        html: `<div class="hospital-symbol">🅗</div>`,
+        className: 'custom-hospital-icon',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15],
+        popupAnchor: [0, -15],
       });
 
       const pharmacyIcon = L.icon({
@@ -79,8 +78,6 @@ const MapComponent: React.FC<MapProps> = ({ center, markers }) => {
 
       // Add service markers
       markers.forEach((service) => {
-        const icon = service.type === 'hospital' ? hospitalIcon : pharmacyIcon;
-
         const popupContent = `
           <div style="font-family: sans-serif; line-height: 1.5;">
             <h4 style="font-weight: bold; margin-bottom: 5px; margin-top: 0;">${service.name}</h4>
@@ -94,9 +91,42 @@ const MapComponent: React.FC<MapProps> = ({ center, markers }) => {
           </div>
         `;
 
-        L.marker([service.lat, service.lng], { icon })
-          .addTo(markersLayer.current)
-          .bindPopup(popupContent);
+        if (service.type === 'hospital') {
+          // Add pulsing trace circle
+          const pulseCircle = L.circle([service.lat, service.lng], {
+            radius: 200, // radius in meters
+            color: 'red',
+            weight: 2,
+            opacity: 0.5,
+            fillColor: 'rgba(255, 0, 0, 0.3)',
+            fillOpacity: 0.4,
+          }).addTo(markersLayer.current);
+
+          // Add animated hospital symbol marker
+          const hospitalMarker = L.marker([service.lat, service.lng], {
+            icon: hospitalIcon,
+          })
+            .addTo(markersLayer.current)
+            .bindPopup(popupContent);
+
+          // Animation effect (simulate pulsing trace)
+          let growing = true;
+          setInterval(() => {
+            const radius = pulseCircle.getRadius();
+            if (growing && radius < 300) {
+              pulseCircle.setRadius(radius + 5);
+            } else if (!growing && radius > 200) {
+              pulseCircle.setRadius(radius - 5);
+            }
+            if (radius >= 300) growing = false;
+            if (radius <= 200) growing = true;
+          }, 100);
+        } else {
+          // Add pharmacy marker
+          L.marker([service.lat, service.lng], { icon: pharmacyIcon })
+            .addTo(markersLayer.current)
+            .bindPopup(popupContent);
+        }
       });
     }
   }, [center, markers]);
@@ -105,17 +135,28 @@ const MapComponent: React.FC<MapProps> = ({ center, markers }) => {
     <>
       <style>
         {`
-          /* Simple pulsing animation for hospital markers */
-          .hospital-icon {
-            animation: pulse 1.5s infinite ease-in-out;
+          .hospital-symbol {
+            font-size: 22px;
+            color: white;
+            background-color: #d32f2f;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.6);
+            animation: pulseSymbol 1.5s infinite ease-in-out;
           }
-          @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.15); }
-            100% { transform: scale(1); }
+
+          @keyframes pulseSymbol {
+            0% { transform: scale(1); box-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
+            50% { transform: scale(1.2); box-shadow: 0 0 15px rgba(255, 0, 0, 0.8); }
+            100% { transform: scale(1); box-shadow: 0 0 5px rgba(255, 0, 0, 0.5); }
           }
         `}
       </style>
+
       <div ref={mapRef} className="h-full w-full" id="map" />
     </>
   );
